@@ -1,18 +1,28 @@
 import AdminNavbar from "../../components/admin/AdminNavbar";
 import AdminSidebar from "../../components/admin/AdminSidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Loading from "../../components/Loading";
 
 const Layout = () => {
-  const { isAdmin, fetchIsAdmin } = useAppContext();
+  const { isAdmin, fetchIsAdmin, user } = useAppContext();
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    fetchIsAdmin();
-  }, []);
+    const check = async () => {
+      if (user) {
+        await fetchIsAdmin();
+      }
+      setChecking(false);
+    };
+    check();
+  }, [user]);
 
-  return isAdmin ? (
+  if (checking) return <Loading />;
+  if (!isAdmin) return <Navigate to="/" />;
+
+  return (
     <>
       <AdminNavbar />
       <div className="flex">
@@ -22,8 +32,6 @@ const Layout = () => {
         </div>
       </div>
     </>
-  ) : (
-    <Loading />
   );
 };
 
