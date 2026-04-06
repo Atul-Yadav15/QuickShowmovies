@@ -46,7 +46,7 @@ const MyBookings = () => {
       {bookings.map((item, index) => (
         <div
           key={index}
-          className="flex flex-col md:flex-row justify-between bg-primary/8 border border-primary/20 rounded-lg mt-4 p-2 max-w-3xl"
+          className="flex flex-col md:flex-row justify-between bg-primary/10 border border-primary/20 rounded-lg mt-4 p-2 max-w-3xl"
         >
           <div className="flex flex-col md:flex-row">
             <img
