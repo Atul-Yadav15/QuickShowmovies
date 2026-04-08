@@ -8,7 +8,7 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const { getToken } = useAuth();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
   const [shows, setShows] = useState([]);
   const [favoriteMovies, setFavoriteMovies] = useState([]);
@@ -19,9 +19,7 @@ export const AppProvider = ({ children }) => {
   const fetchShows = async () => {
     try {
       const { data } = await axios.get("/api/show/all");
-      if (data.success) {
-        setShows(data.shows);
-      }
+      if (data.success) setShows(data.shows);
     } catch (error) {
       console.log(error);
     }
@@ -33,9 +31,7 @@ export const AppProvider = ({ children }) => {
       const { data } = await axios.get("/api/user/favorites", {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
-      if (data.success) {
-        setFavoriteMovies(data.movies);
-      }
+      if (data.success) setFavoriteMovies(data.movies);
     } catch (error) {
       console.log(error);
     }
@@ -43,12 +39,12 @@ export const AppProvider = ({ children }) => {
 
   const fetchIsAdmin = async () => {
     try {
+      const token = await getToken();
+      if (!token) return;
       const { data } = await axios.get("/api/admin/is-admin", {
-        headers: { Authorization: `Bearer ${await getToken()}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (data.success) {
-        setIsAdmin(data.isAdmin);
-      }
+      if (data.success) setIsAdmin(data.isAdmin);
     } catch (error) {
       console.log(error);
     }
@@ -69,6 +65,7 @@ export const AppProvider = ({ children }) => {
     axios,
     getToken,
     user,
+    isLoaded,
     shows,
     favoriteMovies,
     fetchFavoriteMovies,
