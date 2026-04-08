@@ -18,7 +18,7 @@ const Layout = () => {
       setChecking(false);
     };
     check();
-  }, [user]); // runs when user is ready
+  }, [user]);
 
   if (checking) return <Loading />;
   if (!isAdmin) return <Navigate to="/" />;
