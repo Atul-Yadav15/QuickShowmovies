@@ -29,7 +29,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     process.env.FRONTEND_URL,
-    "https://quick-show-woad-iota.vercel.app",
+    "https://quick-showmovies.vercel.app/",
   ].filter(Boolean),
   credentials: true,
 }));
