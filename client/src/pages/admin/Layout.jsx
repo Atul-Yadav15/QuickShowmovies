@@ -10,6 +10,7 @@ const Layout = () => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    if (user === undefined) return;
     const check = async () => {
       if (user) {
         await fetchIsAdmin();
@@ -17,7 +18,7 @@ const Layout = () => {
       setChecking(false);
     };
     check();
-  }, [user]);
+  }, [user]); // runs when user is ready
 
   if (checking) return <Loading />;
   if (!isAdmin) return <Navigate to="/" />;
