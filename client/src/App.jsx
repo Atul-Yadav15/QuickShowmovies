@@ -20,7 +20,7 @@ import Loading from "./components/Loading";
 const App = () => {
   const isAdminRoute = useLocation().pathname.startsWith("/admin");
 
-  const { user } = useAppContext();
+  const { user, isLoaded } = useAppContext();
 
   return (
     <>
@@ -38,15 +38,17 @@ const App = () => {
         {/* Admin Routes */}
         <Route
           path="/admin/*"
-          element={
-            user ? (
-              <Layout />
-            ) : (
-              <div className="min-h-screen flex justify-center items-center">
-                <SignIn fallbackRedirectUrl={"/admin"} />
-              </div>
-            )
-          }
+           element={
+           !isLoaded ? (
+           <Loading />
+            ) : user ? (
+             <Layout />
+                ) : (
+                 <div className="min-h-screen flex justify-center items-center">
+                 <SignIn fallbackRedirectUrl={"/admin"} />
+             </div>
+         )
+         }
         >
           <Route index element={<Dashboard />} />
           <Route path="add-shows" element={<AddShows />} />
