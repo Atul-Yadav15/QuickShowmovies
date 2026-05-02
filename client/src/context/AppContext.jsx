@@ -3,8 +3,7 @@ import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
 // axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
-axios.defaults.baseURL =
-  import.meta.env.VITE_BASE_URL || "https://quickshowmovies-1.onrender.com";
+axios.defaults.baseURL = "https://quickshowmovies-1.onrender.com";
 
 export const AppContext = createContext();
 
