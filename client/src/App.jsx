@@ -1,5 +1,5 @@
 import Navbar from "./components/Navbar";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom"; // ✅ added Navigate
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
 import MovieDetails from "./pages/MovieDetails";
@@ -19,8 +19,7 @@ import Loading from "./components/Loading";
 
 const App = () => {
   const isAdminRoute = useLocation().pathname.startsWith("/admin");
-
-  const { user, isLoaded } = useAppContext();
+  const { user, isLoaded, isAdmin } = useAppContext(); // ✅ added isAdmin
 
   return (
     <>
@@ -34,21 +33,22 @@ const App = () => {
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/loading/:nextUrl" element={<Loading />} />
         <Route path="/favorite" element={<Favorite />} />
-
         {/* Admin Routes */}
         <Route
           path="/admin/*"
-           element={
-           !isLoaded ? (
-           <Loading />
-            ) : user ? (
-             <Layout />
-                ) : (
-                 <div className="min-h-screen flex justify-center items-center">
-                 <SignIn fallbackRedirectUrl={"/admin"} />
-             </div>
-         )
-         }
+          element={
+            !isLoaded ? (
+              <Loading />
+            ) : user && isAdmin ? (  // ✅ added isAdmin check
+              <Layout />
+            ) : user && !isAdmin ? ( // ✅ logged in but not admin
+              <Navigate to="/" />
+            ) : (
+              <div className="min-h-screen flex justify-center items-center">
+                <SignIn fallbackRedirectUrl={"/admin"} />
+              </div>
+            )
+          }
         >
           <Route index element={<Dashboard />} />
           <Route path="add-shows" element={<AddShows />} />
