@@ -29,7 +29,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     process.env.FRONTEND_URL,
-    "https://quick-showmovies.vercel.app/",
+  "https://quickshow-frontend-b0yw.onrender.com",
   ].filter(Boolean),
   credentials: true,
 }));
