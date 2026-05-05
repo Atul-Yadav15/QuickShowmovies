@@ -4,7 +4,20 @@ import User from "../models/User.js";
 
 // API to check if user is an admin
 export const isAdmin = async (req, res) => {
-  res.json({ success: true, isAdmin: true });
+  // res.json({ success: true, isAdmin: true });
+    try {
+    const userId = req.auth.userId;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.json({ success: false, isAdmin: false });
+    }
+    
+    res.json({ success: true, isAdmin: user.isAdmin || false });
+  } catch (error) {
+    console.error("isAdmin error:", error);
+    res.json({ success: false, isAdmin: false });
+  }
 };
 
 // API to get dashboard data
