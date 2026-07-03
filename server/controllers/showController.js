@@ -82,10 +82,10 @@ export const addShow = async (req, res) => {
     }
 
     // Trigger Inngest event
-    // await inngest.send({
-    //   name: "app/show.added",
-    //   data: { movieTitle: movie.title },
-    // });
+    await inngest.send({
+      name: "app/show.added",
+      data: { movieTitle: movie.title },
+    });
 
     res.json({ success: true, message: "Show Added successfully." });
   } catch (error) {
