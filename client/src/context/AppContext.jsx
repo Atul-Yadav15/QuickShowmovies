@@ -4,7 +4,7 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-axios.defaults.baseURL = "https://quickshowmovies-1.onrender.com";
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 export const AppContext = createContext();
 
@@ -15,35 +15,22 @@ export const AppProvider = ({ children }) => {
 
   const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL;
 
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
   const { getToken } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const fetchIsAdmin = async () => {
     try {
-      let token = await getToken();
-
-      if (!token) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        token = await getToken();
-      }
-
-      if (!token) return;
-
       const { data } = await axios.get("/api/admin/is-admin", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${await getToken()}` },
       });
 
-      if (data.success) {
-        setIsAdmin(data.isAdmin);
+      setIsAdmin(data.isAdmin);
 
-        if (!data.isAdmin && location.pathname.startsWith("/admin")) {
-          navigate("/");
-          toast.error("You are not authorized to access admin dashboard");
-        }
+      if (!data.isAdmin && location.pathname.startsWith("/admin")) {
+        navigate("/");
+        toast.error("You are not authorized to access admin dashboard");
       }
     } catch (error) {
       console.error(error);
@@ -66,15 +53,8 @@ export const AppProvider = ({ children }) => {
 
   const fetchFavoriteMovies = async () => {
     try {
-      if (!user) return;
-
-      const token = await getToken();
-      if (!token) return;
-
       const { data } = await axios.get("/api/user/favorites", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${await getToken()}` },
       });
 
       if (data.success) {
@@ -92,23 +72,22 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (isLoaded && user) {
+    if (user) {
       fetchIsAdmin();
       fetchFavoriteMovies();
     }
-  }, [isLoaded, user]);
+  }, [user]);
 
   const value = {
     axios,
+    fetchIsAdmin,
     user,
-    isLoaded,
     getToken,
     navigate,
     isAdmin,
     shows,
     favoriteMovies,
     fetchFavoriteMovies,
-    fetchIsAdmin,
     image_base_url,
   };
 
