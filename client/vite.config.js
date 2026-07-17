@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://quickshowmovies-1.onrender.com",
+        target: "https://quickshowmovies-86v4.onrender.com",
         changeOrigin: true,
         secure: true,
       },
