@@ -10,12 +10,13 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminChecked, setAdminChecked] = useState(false);
   const [shows, setShows] = useState([]);
   const [favoriteMovies, setFavoriteMovies] = useState([]);
 
   const image_base_url = import.meta.env.VITE_TMDB_IMAGE_BASE_URL;
 
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -33,7 +34,9 @@ export const AppProvider = ({ children }) => {
         toast.error("You are not authorized to access admin dashboard");
       }
     } catch (error) {
-      console.error(error);
+      console.error("fetchIsAdmin failed:", error.message);
+    } finally {
+      setAdminChecked(true);
     }
   };
 
@@ -82,9 +85,11 @@ export const AppProvider = ({ children }) => {
     axios,
     fetchIsAdmin,
     user,
+    isLoaded,
     getToken,
     navigate,
     isAdmin,
+    adminChecked,
     shows,
     favoriteMovies,
     fetchFavoriteMovies,

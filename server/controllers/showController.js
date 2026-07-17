@@ -3,17 +3,32 @@ import Movie from "../models/Movie.js";
 import Show from "../models/Show.js";
 import { inngest } from "../inngest/index.js";
 
+const fetchTmdb = async (url, retries = 3, delayMs = 1000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await axios.get(url, {
+        headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` },
+        timeout: 10000,
+      });
+    } catch (error) {
+      const isRetryable =
+        error.code === "ECONNRESET" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED";
+
+      if (!isRetryable || attempt === retries) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+};
+
 // API to get now playing movies from TMDB API
 export const getNowPlayingMovies = async (req, res) => {
   try {
-    const { data } = await axios.get(
-      "https://api.themoviedb.org/3/movie/now_playing",
-      {
-        headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` },
-      }
+    const { data } = await fetchTmdb(
+      "https://api.themoviedb.org/3/movie/now_playing"
     );
-  
-    
+
     const movies = data.results;
     res.json({ success: true, movies: movies });
   } catch (error) {
@@ -30,15 +45,9 @@ export const addShow = async (req, res) => {
     let movie = await Movie.findById(movieId);
 
     if (!movie) {
-      // Fetch movie details and credits from TMDB API
       const [movieDetailsResponse, movieCreditsResponse] = await Promise.all([
-        axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
-          headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` },
-        }),
-
-        axios.get(`https://api.themoviedb.org/3/movie/${movieId}/credits`, {
-          headers: { Authorization: `Bearer ${process.env.TMDB_API_KEY}` },
-        }),
+        fetchTmdb(`https://api.themoviedb.org/3/movie/${movieId}`),
+        fetchTmdb(`https://api.themoviedb.org/3/movie/${movieId}/credits`),
       ]);
 
       const movieApiData = movieDetailsResponse.data;
@@ -59,7 +68,6 @@ export const addShow = async (req, res) => {
         runtime: movieApiData.runtime,
       };
 
-      //   Add movie to the database
       movie = await Movie.create(movieDetails);
     }
 
@@ -72,7 +80,7 @@ export const addShow = async (req, res) => {
           movie: movieId,
           showDateTime: new Date(dateTimeString),
           showPrice,
-          occupiedSeats: {}, // Initialize with empty object
+          occupiedSeats: {},
         });
       });
     });
@@ -81,7 +89,6 @@ export const addShow = async (req, res) => {
       await Show.insertMany(showsToCreate);
     }
 
-    // Trigger Inngest event
     await inngest.send({
       name: "app/show.added",
       data: { movieTitle: movie.title },
@@ -101,10 +108,9 @@ export const getShows = async (req, res) => {
       .populate("movie")
       .sort({ showDateTime: 1 });
 
-    // filter unique movies by movie ID
     const uniqueMovieIds = new Set();
     const uniqueMovies = [];
-    
+
     shows.forEach((show) => {
       if (show.movie && !uniqueMovieIds.has(show.movie._id.toString())) {
         uniqueMovieIds.add(show.movie._id.toString());
@@ -112,7 +118,6 @@ export const getShows = async (req, res) => {
       }
     });
 
-    console.log(`Found ${shows.length} shows, ${uniqueMovies.length} unique movies`);
     res.json({ success: true, shows: uniqueMovies });
   } catch (error) {
     console.error("Error in getShows:", error);
@@ -124,7 +129,6 @@ export const getShows = async (req, res) => {
 export const getShow = async (req, res) => {
   try {
     const { movieId } = req.params;
-    // get all upcoming shows for the movie
     const shows = await Show.find({
       movie: movieId,
       showDateTime: { $gte: new Date() },
@@ -138,7 +142,6 @@ export const getShow = async (req, res) => {
       if (!dateTime[date]) {
         dateTime[date] = [];
       }
-
       dateTime[date].push({ time: show.showDateTime, showId: show._id });
     });
 

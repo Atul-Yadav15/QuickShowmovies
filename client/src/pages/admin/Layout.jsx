@@ -1,28 +1,8 @@
 import AdminNavbar from "../../components/admin/AdminNavbar";
 import AdminSidebar from "../../components/admin/AdminSidebar";
-import { Outlet, Navigate } from "react-router-dom";
-import { useAppContext } from "../../context/AppContext";
-import { useEffect, useState } from "react";
-import Loading from "../../components/Loading";
+import { Outlet } from "react-router-dom";
 
 const Layout = () => {
-  const { isAdmin, fetchIsAdmin, user } = useAppContext();
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    if (user === undefined) return;
-    const check = async () => {
-      if (user) {
-        await fetchIsAdmin();
-      }
-      setChecking(false);
-    };
-    check();
-  }, [user]);
-
-  if (checking) return <Loading />;
-  if (!isAdmin) return <Navigate to="/" />;
-
   return (
     <>
       <AdminNavbar />

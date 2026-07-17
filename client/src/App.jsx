@@ -1,5 +1,5 @@
 import Navbar from "./components/Navbar";
-import { Route, Routes, useLocation, Navigate } from "react-router-dom"; // ✅ added Navigate
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
 import MovieDetails from "./pages/MovieDetails";
@@ -19,7 +19,7 @@ import Loading from "./components/Loading";
 
 const App = () => {
   const isAdminRoute = useLocation().pathname.startsWith("/admin");
-  const { user, isLoaded, isAdmin } = useAppContext(); // ✅ added isAdmin
+  const { user, isLoaded, isAdmin, adminChecked } = useAppContext();
 
   return (
     <>
@@ -37,11 +37,11 @@ const App = () => {
         <Route
           path="/admin/*"
           element={
-            !isLoaded ? (
+            !isLoaded || (user && !adminChecked) ? (
               <Loading />
-            ) : user && isAdmin ? (  // ✅ added isAdmin check
+            ) : user && isAdmin ? (
               <Layout />
-            ) : user && !isAdmin ? ( // ✅ logged in but not admin
+            ) : user && !isAdmin ? (
               <Navigate to="/" />
             ) : (
               <div className="min-h-screen flex justify-center items-center">

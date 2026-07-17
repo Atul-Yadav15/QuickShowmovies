@@ -31,7 +31,6 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     process.env.FRONTEND_URL,
-  "https://quickshow-frontend-b0yw.onrender.com",
   ].filter(Boolean),
   credentials: true,
 }));
